@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesMate · AI 销售作战助手</title>
+<style>
+/* ============================================================
+   SalesMate 原型 Demo · 单文件零依赖
+   说明：本文件为产品原型演示版，内置本地规则引擎模拟 AI 生成效果。
+   接入真实 LLM：搜索 generateWithLLM 函数，替换其中一段即可。
+   ============================================================ */
+:root {
+  --brand: #4F46E5;
+  --brand-2: #7C3AED;
+  --brand-light: #EEF2FF;
+  --ink: #0F172A;
+  --ink-2: #475569;
+  --ink-3: #94A3B8;
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --line: #E2E8F0;
+  --success: #10B981;
+  --warn: #F59E0B;
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  --shadow-lg: 0 4px 8px rgba(15,23,42,.06), 0 16px 48px rgba(79,70,229,.12);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--ink); line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 顶栏 ---------- */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  max-width: 1080px; margin: 0 auto; padding: 14px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+.logo-mark {
+  width: 34px; height: 34px; border-radius: 10px; flex: none;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  display: grid; place-items: center; color: #fff; font-size: 16px;
+  box-shadow: 0 4px 12px rgba(79,70,229,.35);
+}
+.logo small { font-size: 11px; color: var(--ink-3); font-weight: 500; display: block; letter-spacing: 1px; }
+nav { display: flex; gap: 4px; margin-left: 8px; flex: 1; }
+nav button {
+  border: none; background: transparent; padding: 8px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: all .18s;
+}
+nav button:hover { color: var(--brand); background: var(--brand-light); }
+nav button.active { color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 4px 14px rgba(79,70,229,.35); }
+.badge {
+  font-size: 11px; font-weight: 700; color: var(--warn);
+  border: 1px solid #FDE68A; background: #FFFBEB;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+
+/* ---------- 布局 ---------- */
+main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+.hero { text-align: center; margin-bottom: 32px; }
+.hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+.hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--brand), var(--brand-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
+.hero .hint { display: inline-flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 13px; color: var(--ink-3); background: #fff; border: 1px dashed var(--line); padding: 6px 14px; border-radius: 999px; }
+
+.tab-panel { display: none; animation: fadeIn .3s; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+/* ---------- 卡片与表单 ---------- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+.card h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.card .sub { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+.field label .req { color: #EF4444; margin-left: 2px; }
+.field select, .field textarea, .field input[type=text] {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--ink); background: #fff;
+  transition: border .15s, box-shadow .15s; outline: none;
+}
+.field select:focus, .field textarea:focus, .field input[type=text]:focus {
+  border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.field textarea { resize: vertical; min-height: 88px; }
+.btn-primary {
+  width: 100%; padding: 13px; border: none; border-radius: 12px; cursor: pointer;
+  font-size: 15px; font-weight: 700; color: #fff; font-family: inherit;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  box-shadow: 0 6px 20px rgba(79,70,229,.35); transition: transform .15s, box-shadow .15s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(79,70,229,.42); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+.btn-ghost {
+  border: 1.5px solid var(--line); background: #fff; color: var(--ink-2);
+  padding: 9px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+/* ---------- 空态 ---------- */
+.empty {
+  border: 2px dashed var(--line); border-radius: var(--radius);
+  min-height: 420px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px; color: var(--ink-3); text-align: center; padding: 40px;
+}
+.empty .icon { font-size: 44px; filter: grayscale(.2); }
+.empty b { color: var(--ink-2); font-size: 15px; }
+.empty p { font-size: 13px; max-width: 340px; }
+
+/* ---------- 生成中 ---------- */
+.loading-box { min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+.spinner {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 4px solid var(--brand-light); border-top-color: var(--brand);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--ink-2); font-weight: 600; }
+.loading-sub { font-size: 12px; color: var(--ink-3); }
+
+/* ---------- 结果模块 ---------- */
+.result-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.result-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.result-title .tag { font-size: 11px; color: var(--brand); background: var(--brand-light); padding: 3px 10px; border-radius: 999px; font-weight: 700; }
+.result-actions { display: flex; gap: 8px; }
+.module {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 18px 20px; margin-bottom: 14px;
+  opacity: 0; transform: translateY(14px); animation: rise .45s forwards;
+  position: relative;
+}
+@keyframes rise { to { opacity: 1; transform: none; } }
+.module-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.module-ico { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 15px; flex: none; background: var(--brand-light); }
+.module-name { font-size: 14px; font-weight: 800; color: var(--ink); }
+.module-tip { font-size: 11px; color: var(--ink-3); margin-left: auto; }
+.copy-btn {
+  border: none; background: var(--brand-light); color: var(--brand);
+  font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 8px;
+  cursor: pointer; font-family: inherit; transition: all .15s; flex: none;
+}
+.copy-btn:hover { background: var(--brand); color: #fff; }
+.module-body { font-size: 14.5px; color: #1E293B; white-space: pre-wrap; }
+.module-body .q-item { display: flex; gap: 8px; margin: 6px 0; align-items: baseline; }
+.module-body .q-num { font-size: 11px; font-weight: 800; color: var(--brand); flex: none; }
+.obj-pair { margin: 8px 0; padding: 10px 14px; background: #FAFBFF; border-left: 3px solid var(--brand); border-radius: 0 10px 10px 0; }
+.obj-pair .o { font-size: 12.5px; color: var(--ink-2); font-weight: 700; margin-bottom: 3px; }
+.obj-pair .r { font-size: 13.5px; }
+.cursor { display: inline-block; width: 2px; height: 1em; background: var(--brand); vertical-align: -2px; animation: blink .8s infinite; margin-left: 1px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- 异议库 ---------- */
+.obj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.obj-chip {
+  border: 1.5px solid var(--line); background: #fff; border-radius: 12px;
+  padding: 12px 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); transition: all .15s; font-family: inherit;
+}
+.obj-chip:hover { border-color: var(--brand); color: var(--brand); }
+.obj-chip.active { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(79,70,229,.3); }
+.step-flow { display: flex; gap: 6px; margin: 14px 0 18px; flex-wrap: wrap; }
+.step-pill {
+  flex: 1; min-width: 88px; text-align: center; padding: 10px 6px; border-radius: 10px;
+  font-size: 12.5px; font-weight: 700; background: var(--brand-light); color: var(--brand);
+  position: relative;
+}
+.step-pill small { display: block; font-size: 10px; font-weight: 500; opacity: .7; }
+.step-card { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+.step-card:last-of-type { border-bottom: none; }
+.step-no { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; margin-top: 2px; }
+.step-card b { font-size: 14px; display: block; margin-bottom: 3px; }
+.step-card p { font-size: 13.5px; color: var(--ink-2); }
+.script-sample { background: #FAFBFF; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-top: 10px; }
+.script-sample .tone { font-size: 11px; font-weight: 800; color: var(--brand); background: #fff; border: 1px solid var(--line); padding: 2px 10px; border-radius: 999px; margin-bottom: 8px; display: inline-block; }
+.script-sample p { font-size: 13.5px; color: #1E293B; }
+
+/* ---------- 邮件 ---------- */
+.email-subject { display: flex; align-items: center; gap: 10px; background: var(--brand-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; }
+.email-subject .lbl { font-size: 12px; font-weight: 800; color: var(--brand); flex: none; }
+.email-subject p { font-size: 14px; font-weight: 700; }
+.email-body { white-space: pre-wrap; font-size: 14.5px; color: #1E293B; }
+.tone-seg { display: flex; gap: 0; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+.tone-seg button { flex: 1; border: none; background: #fff; padding: 9px 4px; font-size: 13px; font-weight: 600; color: var(--ink-3); cursor: pointer; font-family: inherit; transition: all .15s; }
+.tone-seg button.active { background: var(--brand); color: #fff; }
+
+/* ---------- Toast ---------- */
+#toast {
+  position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 600;
+  padding: 10px 22px; border-radius: 999px; opacity: 0; pointer-events: none;
+  transition: all .25s; z-index: 99; box-shadow: 0 10px 30px rgba(15,23,42,.3);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- 页脚 ---------- */
+footer { border-top: 1px solid var(--line); padding: 28px 24px; text-align: center; color: var(--ink-3); font-size: 12.5px; background: #fff; }
+footer b { color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">⚡</div>
+      <div>SalesMate<small>销售智囊 · AI 作战助手</small></div>
+    </div>
+    <nav>
+      <button class="active" data-tab="script">🎯 作战方案</button>
+      <button data-tab="objection">🛡️ 异议应对</button>
+      <button data-tab="email">📧 跟进邮件</button>
+    </nav>
+    <span class="badge">原型演示版 · 本地规则引擎</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>见客户前 <em>5 分钟</em>，拿到一份能直接用的作战方案</h1>
+    <p>选择客户场景，AI 为你生成开场白 · 提问框架 · 价值主张 · 异议预案 · 下一步行动</p>
+    <div class="hint">💡 本原型内置本地规则引擎模拟生成 · 接入真实 LLM 见代码注释</div>
+  </div>
+
+  <!-- ================= Tab 1 · 作战方案 ================= -->
+  <section class="tab-panel active" id="tab-script">
+    <div class="grid">
+      <div class="card">
+        <h2>🎯 客户场景</h2>
+        <div class="sub">输入越具体，方案越可用</div>
+        <div class="field">
+          <label>客户所在行业<span class="req">*</span></label>
+          <select id="f-industry"></select>
+        </div>
+        <div class="field">
+          <label>客户角色<span class="req">*</span></label>
+          <select id="f-role">
+            <option value="决策者">决策者（老板 / 总经理 / 事业部负责人）</option>
+            <option value="影响者">影响者（部门经理 / 技术负责人）</option>
+            <option value="使用者">使用者（一线员工 / 实际操作者）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>沟通阶段<span class="req">*</span></label>
+          <select id="f-stage"></select>
+        </div>
+        <div class="field">
+          <label>本次目标（选填，一句话）</label>
+          <input type="text" id="f-goal" maxlength="50" placeholder="例：约到决策层汇报会">
+        </div>
+        <button class="btn-primary" id="btn-generate">⚡ 生成作战方案</button>
+      </div>
+      <div id="script-result">
+        <div class="empty">
+          <div class="icon">🗺️</div>
+          <b>作战方案将在这里生成</b>
+          <p>填好左侧场景，点击「生成作战方案」。每个模块可单独复制，支持「换一版」重新生成。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Tab 2 · 异议应对 ================= -->
+  <section class="tab-panel" id="tab-objection">
+    <div class="card" style="margin-bottom:20px">
+      <h2>🛡️ 高频异议库</h2>
+      <div class="sub">点击异议，查看五步应对法 —— 认同 · 探究 · 重构 · 证据 · 推进</div>
+      <div class="obj-grid" id="obj-grid"></div>
+    </div>
+    <div id="obj-detail"><div class="empty"><div class="icon">👆</div><b>请选择一个客户异议</b><p>12 类 B2B 销售最高频异议，每个附五步应对策略与两版话术示例（强势单刀 / 温和顾问）</p></div></div>
+  </section>
+
+  <!-- ================= Tab 3 · 跟进邮件 ================= -->
+  <section class="tab-panel" id="tab-email">
+    <div class="grid">
+      <div class="card">
+        <h2>📧 邮件要素</h2>
+        <div class="sub">把沟通要点交给 AI，30 秒出稿</div>
+        <div class="field">
+          <label>客户称呼</label>
+          <input type="text" id="e-name" value="王总" maxlength="10">
+        </div>
+        <div class="field">
+          <label>语气</label>
+          <div class="tone-seg" id="e-tone">
+            <button class="active" data-tone="正式专业">正式专业</button>
+            <button data-tone="亲切自然">亲切自然</button>
+            <button data-tone="简洁干练">简洁干练</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>本次沟通要点（每行一条）</label>
+          <textarea id="e-points" placeholder="例：&#10;演示了排产协同模块，客户认可&#10;担心和老系统对接工作量&#10;下周三前发对接方案"></textarea>
+        </div>
+        <button class="btn-primary" id="btn-email">✉️ 生成跟进邮件</button>
+      </div>
+      <div id="email-result">
+        <div class="empty"><div class="icon">📨</div><b>邮件草稿将在这里生成</b><p>输出四段式结构：感谢回顾 → 双方共识 → 价值强化 → 明确下一步</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <b>SalesMate · 销售智囊</b> — 产品原型演示版（V1.0）· 本地规则引擎模拟 AI 生成，无网络请求 ·
+  完整产品方案见 <b>docs/</b> 目录：调研 / 需求 / 路线图 / 流程 / PRD / 技术方案
+</footer>
+
+<div id="toast">已复制到剪贴板</div>
+
+<script>
+/* ==================================================================
+ * 数据层：场景话术样本库
+ * 真实产品中，此层由 LLM 生成（见 generateWithLLM 注释），此处为演示数据
+ * ================================================================== */
+const INDUSTRIES = {
+  "制造业": {
+    hooks: [
+      "听说贵司今年产线扩了两条，产能上来了，排产协同的压力是不是也跟着上来了？",
+      "上次行业展会上不少制造企业都在聊交付周期压缩，这块您现在是怎么盘的？",
+      "很多制造企业的痛点不是没订单，而是交付准时率和成本两头拉扯——您有类似感受吗？"
+    ],
+    values: [
+      "我们可以帮您把跨厂区、跨部门的协同响应从「天」级压到「小时」级——同行落地后交付准时率平均提升 12 个百分点。",
+      "方案聚焦生产、销售、供应链三张表的数据打通，让您拍板时看到的不再是各说各话的报表，而是同一份数据。"
+    ]
+  },
+  "SaaS软件": {
+    hooks: [
+      "现在不少软件团队都在为续费率头疼，贵司客户成功这块是怎么搭的？",
+      "看到贵司产品最近连上几个大版本，迭代这么快，研发和客户沟通的成本是不是也在涨？",
+      "SaaS 圈都在聊 PLG，但国内真正跑通的不多——贵司增长现在主要靠销售驱动还是产品自增长？"
+    ],
+    values: [
+      "我们能帮您把客户健康度从「感觉」变成「信号」：续费风险提前 45 天预警，客户成功团队的人均维护客户数可以翻一倍。",
+      "方案核心是把您的产品价值在客户侧「可视化」，让续费汇报时客户老板看到的不是账单，而是省下的钱。"
+    ]
+  },
+  "金融": {
+    hooks: [
+      "金融行业合规要求越来越细，客户沟通留痕这块贵司现在怎么管的？",
+      "财富管理获客成本肉眼可见地涨，一线客户经理的人均产能还顶得住吗？",
+      "不少机构都在做线上化转型，贵司线下团队现在转型的阻力大吗？"
+    ],
+    values: [
+      "方案帮助一线人员把合规动作嵌入展业流程——既守住监管红线，又不牺牲客户体验，某股份制银行试点后投诉率下降 40%。",
+      "我们可以把客户经理的重复性工作（资料准备、合规话术查询）压缩 70%，让他们把时间花在高净值客户身上。"
+    ]
+  },
+  "医疗": {
+    hooks: [
+      "集采之后，贵司销售团队的重心是不是也从关系型往学术型转了？",
+      "医院信息化预算收紧，项目型销售是不是越来越卷了？",
+      "医疗行业决策链长，主任、设备科、院长一圈下来，您一般卡在哪个环节？"
+    ],
+    values: [
+      "我们的方案帮您把学术推广的动作标准化、可追溯——既符合合规要求，又让每次拜访都沉淀为可量化的客户资产。",
+      "同行客户用方案后，单项目决策周期平均缩短 30%，核心是把关键决策人的认知节奏管理起来了。"
+    ]
+  },
+  "教育培训": {
+    hooks: [
+      "行业调整之后，活下来的机构都在转素质教育和 B 端，贵司现在重心在哪块？",
+      "机构的续费率是命根子，班主任团队的跟进效率现在怎么样？",
+      "现在家长决策周期越来越长，从试听到成交，贵司平均要跟多少次？"
+    ],
+    values: [
+      "方案帮您把续费从「到期前突击」变成「全程有信号」：流失预警提前 60 天，试点机构续费率提升 15 个点。",
+      "我们可以把优秀班主任的跟单动作拆解复制给全员，新人上手周期从 3 个月缩到 3 周。"
+    ]
+  },
+  "贸易零售": {
+    hooks: [
+      "零售终端数据碎片化得厉害，线上线下两本账的问题您解决了吗？",
+      "消费品牌都在卷私域，贵司导购这层的数字化工具用得顺吗？",
+      "贸易型企业毛利越摊越薄，您的团队现在更多在卷价格还是卷服务？"
+    ],
+    values: [
+      "方案帮您把 300 家门店的销售数据实时拉通，补货决策从「每周拍脑袋」变成「每天看数据」。",
+      "我们可以让导购的加微、跟客、复购动作全部在线化——某品牌实测导购人均产出提升 25%。"
+    ]
+  },
+  "其他行业": {
+    hooks: [
+      "想先跟您对齐今天的时间：我准备了两个话题——您团队现在最大的困扰，和我们最近帮同类客户解决的真实案例，您想先聊哪个？",
+      "在聊方案之前，我想先确认一下：这件事在您今年的优先级里，大概排第几位？",
+      "我今天不急着讲产品，更想先听听您这边的实际情况——您觉得目前最值得改进的一个环节是什么？"
+    ],
+    values: [
+      "我们的价值不在于功能多，而在于把您团队最耗时的那个环节砍掉一半——具体是哪个环节，等下我们一起来找。",
+      "方案上线周期短、见效快：同类客户通常 4 周内跑通第一个场景，第一个月就能看到可量化的变化。"
+    ]
+  }
+};
+
+const ROLES = {
+  "决策者": {
+    questions: [
+      ["您团队今年最重要的一件事是什么？", "现状 · 战略对齐"],
+      ["这件事推进到现在，卡您的最大瓶颈是什么？", "痛点 · 定位关键障碍"],
+      ["如果这个瓶颈解决，对您今年的核心指标大概值多少？", "价值 · 量化影响"]
+    ],
+    lens: "对决策者，价值主张要落在经营指标上（收入、成本、风险），而不是功能细节。",
+    objPref: ["预算", "汇报"]
+  },
+  "影响者": {
+    questions: [
+      ["这个方案如果落地，您这边最担心的是哪一块？", "顾虑 · 预防阻力"],
+      ["您日常在这件事上花时间最多的环节是什么？", "痛点 · 找到切入口"],
+      ["如果有个工具能省掉这个环节，您希望它长什么样？", "期望 · 让他参与设计"]
+    ],
+    lens: "对影响者，重点是「让他的日子更好过」+「不增加他的落地风险」，他是你内部的代言人。",
+    objPref: ["效果", "竞品"]
+  },
+  "使用者": {
+    questions: [
+      ["您现在每天用这套流程，最顺手和最别扭的分别是什么？", "体验 · 建立共鸣"],
+      ["上次您想完成某个操作但被卡住，是因为什么？", "痛点 · 具体场景"],
+      ["如果新方案下周上线，您最希望先解决哪个日常麻烦？", "期望 · 收集一线需求"]
+    ],
+    lens: "对使用者，重点是他「用得爽」——他是口碑的放大器，也是抱怨的放大器。",
+    objPref: ["试用", "团队"]
+  }
+};
+
+const STAGES = {
+  "初次接触": {
+    openers: ["破冰建立信任", "先聊他，再聊你"],
+    next: "今天不推进任何决定，只求一件事：约一次 30 分钟的深入沟通，我带 2 个您同行的真实案例过来。",
+    plans: [
+      ["客户说「先发个资料吧」", "「资料我可以发，但那是通用版。我可以根据您刚才提到的情况，整理一页只属于您的重点——周四前发您，您看行吗？」"],
+      ["客户说「我们暂时没预算」", "「预算的事不急，先搞清楚值不值得花。我先帮您算笔账，您再决定要不要进入下一步。」"]
+    ]
+  },
+  "需求挖掘": {
+    openers: ["深挖痛点并量化", "把「不舒服」变成「数字」"],
+    next: "把我今天听到的三个痛点整理成一份《现状诊断报告》发您，您确认后，我们约一次关键决策人参加的确认会。",
+    plans: [
+      ["客户说「我们内部再讨论一下」", "「应该的。为了让您内部讨论更高效，我把大家通常会问的 3 个问题整理好发您，您看哪天方便同步一次结论？」"],
+      ["客户说「需求没那么急」", "「理解。那我换个问法：如果这个问题再拖半年，对您那边影响最大的是什么？」"]
+    ]
+  },
+  "方案演示": {
+    openers: ["针对痛点展示价值", "只演示他关心的 20%"],
+    next: "演示只覆盖了通用场景，我建议做一次针对您实际数据的定制演示——给我 3 天准备，下周约您和团队 45 分钟。",
+    plans: [
+      ["客户说「功能看起来都差不多」", "「功能清单确实大家都有，差别在场景。您提到过 XX 场景，我现在用您的实际情况演示一遍，您来评判。」"],
+      ["客户说「要和竞品对比一下」", "「应该比，而且我帮您比——我把对比维度列出来，您来定权重，咱们一起打分。」"]
+    ]
+  },
+  "异议处理": {
+    openers: ["化解顾虑重建信心", "异议 = 未被满足的信息需求"],
+    next: "今天聊的顾虑点，我两天内给您一份书面回应（含数据来源和案例联系方式）。您可以拿着它去内部汇报，随时找我补充弹药。",
+    plans: [
+      ["客户说「效果我不太确定」", "「不确定是应该的，光听我说不算数。我给您两个验证方式：看同行数据，或者小范围试两周——您选哪种？」"],
+      ["客户说「换系统太麻烦了」", "「麻烦的从来不是换系统，是换系统的过程没管好。我们的迁移方案分三步走，每一步都有回退方案，风险是锁死的。」"]
+    ]
+  },
+  "谈判成交": {
+    openers: ["推动具体承诺", "把「再想想」变成「下一步做什么」"],
+    next: "合同流程上有两个时间点需要您帮忙盯：法务审核和用印。如果本周能走完，我们赶在下月初上线，您团队当月就能用起来。",
+    plans: [
+      ["客户说「我再考虑考虑」", "「当然。不过我想确认一下：您考虑的是方案本身，还是时机问题？如果是方案，我现在就能调整；如果是时机，您预计什么条件成熟？」"],
+      ["客户说「价格能不能再谈」", "「价格我能去申请，但我要一个交换条件：您承诺年付 + 案例授权，我去帮您拿到底价——这样咱们俩都好交代。」"]
+    ]
+  }
+};
+
+/* ---------------- 异议库（12 类） ---------------- */
+const OBJECTIONS = {
+  "价格太贵": {
+    steps: [
+      ["认同", "贵不是问题，觉得不值才是。先承认价格确实不是行业最低，卸下对方的攻击姿态。"],
+      ["探究", "「您说的贵，是和竞品比，还是超出了今年预算？」——把一个『贵』字拆成两种完全不同的应对路径。"],
+      ["重构", "把总价重构为单位成本或投资回报：「按三年使用期算，每天成本不到一杯咖啡，而它每天为您省 2 小时。」"],
+      ["证据", "给出同规模客户的投入产出数据：「XX 客户第一年多花了 X 万，但省下的人力成本是 X 万的三倍。」"],
+      ["推进", "不要求当场接受价格，而是给一个低承诺动作：「我可以按您的预算出一版分期或缩减范围的方案，您看看能不能跑通第一步。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，直说，我们不是行业最便宜的，报价里 30% 是您看不到的服务成本——上线陪跑、数据迁移、故障 2 小时响应。便宜的方案这些全都砍掉了，后面加回来的钱比省下的多。」"],
+      ["温和顾问", "「我理解，预算是硬约束。这样，我们不谈总价，先算一笔账：您团队在这件事上每月耗掉的人力成本是多少？如果方案能砍掉一半，多少个月回本？算完这笔账，贵不贵就有答案了。」"]
+    ]
+  },
+  "再考虑考虑": {
+    steps: [
+      ["认同", "「应该考虑，这是负责任的态度。」——先把礼貌还给对方，别逼单。"],
+      ["探究", "「方便告诉我，您主要在考虑哪一点吗？是方案本身、时机，还是内部流程？」——三选一提问，降低回答成本。"],
+      ["重构", "把开放式拖延重构为封闭式推进：「考虑的本质是想让信息更充分——缺什么信息，我来补。」"],
+      ["证据", "主动提供决策支持材料：同行案例、ROI 测算、试用数据——把「考虑」需要的弹药递到手上。"],
+      ["推进", "约定下次沟通的具体时间与话题：「周四下午我给您电话，咱们就把这个问题聊透，您看方便吗？」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，我跟您直说：『再考虑』一般有三种——方案不对、时机不对、人对了但流程卡住。您是哪一种？前两种我马上调整，第三种我现在就给您出内部汇报材料。」"],
+      ["温和顾问", "「完全理解，这么重要的决定不该草率。为了让您考虑得更有依据，我把您可能需要的材料准备好：三个同行案例和一份内部汇报用的 PPT。周四我给您电话，看还有什么需要补充的？」"]
+    ]
+  },
+  "已有供应商": {
+    steps: [
+      ["认同", "「有稳定合作的供应商是好事，说明您对合作伙伴是有要求的。」——切忌攻击现有供应商。"],
+      ["探究", "「合作这么久，您对目前最满意和最希望改进的各是什么？」——满意点不要碰，改进点是切入口。"],
+      ["重构", "不是替换，而是增量：「我们不做替换，先在现有方案覆盖不了的 XX 场景做个补充，跑通后再谈深度。」"],
+      ["证据", "展示差异化场景的真实对比数据，尤其现有供应商薄弱环节的案例。"],
+      ["推进", "从非核心场景切入试点：「先在 A 项目小范围并行三个月，数据说话，您零风险。」"]
+    ],
+    samples: [
+      ["强势单刀", "「我不建议您换掉他们——合作了这么久，默契也是资产。但您刚说的 XX 环节他们做了两年没解决，这正是我们的强项。并行三个月，数据不好我主动撤，您零成本。」"],
+      ["温和顾问", "「有稳定的供应商挺好的。我的建议是：不替换，先补位。您提到他们在 XX 上响应慢，这块我们可以先服务起来，等您觉得真的更好了，再逐步扩大合作。」"]
+    ]
+  },
+  "要汇报领导": {
+    steps: [
+      ["认同", "「应该汇报，这么大的决定本来就该让领导知情。」——支持流程，而非对抗流程。"],
+      ["探究", "「领导最关注的是成本、风险还是效果？汇报时我可以为您准备对应材料。」——帮你的人赢，才能赢。"],
+      ["重构", "把「汇报」从障碍重构为助攻机会：「您不是去汇报，是去带着完整方案请领导做选择题。」"],
+      ["证据", "提供一页纸汇报材料模板：问题 → 方案 → 投入 → 回报 → 风险控制，让领导 3 分钟看完。"],
+      ["推进", "争取参与汇报：「如果方便，我可以以技术顾问身份参加，领导的问题当场有人接。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，汇报可以，但别空着手去。我给您准备三样东西：一页纸决策摘要、同行的投入产出数据、还有我们敢承诺的服务条款。您拿着这三样去，领导只会问一个问题：为什么不早做？」"],
+      ["温和顾问", "「我帮您准备汇报材料吧——领导时间紧，一页纸最有效：问题、方案、回报、风险四块。如果需要，汇报会我也可以列席，技术细节有人当场回答，您的汇报会更从容。」"]
+    ]
+  },
+  "暂无预算": {
+    steps: [
+      ["认同", "「预算确实是最实际的问题，周期内挪不出来很正常。」——表示理解，不纠缠。"],
+      ["探究", "「您下一轮预算规划是什么时候？立项窗口一般提前多久？」——把拒绝变成时间表。"],
+      ["重构", "预算是周期问题，不是价值问题：「方案值不值得做，和这个季度有没有钱，是两件事——先做决定，再排资金。」"],
+      ["证据", "提供预算申请所需的测算材料，帮他立项而非只是帮他砍价。"],
+      ["推进", "锁定下一轮预算的先手位：「现在先签意向锁定价格与配置，等您预算下来直接生效，不占本期额度。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，预算永远是本期的，机会不等人。这样处理：现在签意向书，价格和配置按今天谈的锁定，等您下期预算批下来直接生效。您用明年的钱办今年的事，中间这几个月的服务我送。」"],
+      ["温和顾问", "「没关系，预算有周期很正常。我建议这样：我帮您把 ROI 测算和立项材料做好，您放进下一轮预算规划里——材料越扎实，通过率越高。咱们约个时间把立项逻辑先对齐？」"]
+    ]
+  },
+  "需要先试用": {
+    steps: [
+      ["认同", "「试用是最稳妥的方式，光听我讲不如自己上手。」——顺势而为。"],
+      ["探究", "「您最想验证哪一点？如果只能验证一件事，您选什么？」——把模糊试用变成定向验证。"],
+      ["重构", "试用不是免费玩，是有设计的验证：「我们不为试用而试用——两周，一个场景，一个成功标准。」"],
+      ["证据", "给出试用期成功的判据与过往试用的通过率数据。"],
+      ["推进", "签试用协议时同步约定转正式的触发条件：「如果两周后指标达标，转正式合同的流程我们提前准备好。」"]
+    ],
+    samples: [
+      ["强势单刀", "「可以试，但我反对『随便试试』——试不出结果，耽误您两周。定一个场景、一个指标、两周期限：指标达标，您直接上；不达标，我当场告诉您为什么我们不适合。敢定指标的供应商才敢陪您试。」"],
+      ["温和顾问", "「试用没问题，为了让它真正说明问题，我建议咱们先明确验证目标——您最关心的是效率、稳定性还是员工上手速度？针对这一个问题设计两周的试用，结论会清晰得多。」"]
+    ]
+  },
+  "效果存疑": {
+    steps: [
+      ["认同", "「您的怀疑有道理——宣传材料谁都会写。」——站到怀疑者一边。"],
+      ["探究", "「您说的效果，指的是数据指标、落地过程，还是服务响应？」——定位怀疑的真正对象。"],
+      ["重构", "把「信不信」重构为「怎么验证」：「效果不是信出来的，是验出来的——我们来设计验证方式。」"],
+      ["证据", "第三方可验证的证据优于自证：客户可受访、数据口径公开、合同写进效果条款。"],
+      ["推进", "提供分阶段验证路径：「先小场景拿到第一手数据，再决定是否扩大。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，我不劝您信我。三家客户联系方式给您，您直接打过去问最差的使用体验是什么——比听我说一百句都强。敢给客户电话的，和不敢给的，您选哪个？」"],
+      ["温和顾问", "「您的谨慎我完全理解。这样，我把效果的验证拆成三步：看同行脱敏数据、实地参观一家客户、小范围试两周。三步走完您还有疑虑，说明我们确实不适合您，我主动退出。」"]
+    ]
+  },
+  "竞品比较": {
+    steps: [
+      ["认同", "「货比三家是对的，尤其是这种长期合作的决策。」——欢迎比较。"],
+      ["探究", "「您目前对比下来，最看重哪几个维度？」——把比较标准拉回你的优势区。"],
+      ["重构", "从功能清单比较重构为场景契合度比较：「功能都在清单上，差别在您这个具体场景里谁真的能落地。」"],
+      ["证据", "选 2-3 个对方短板场景做深入对比，主动承认自己在非核心场景的不足（可信度+）。"],
+      ["推进", "共同制定选型标准：「维度您定、权重您定，我们各自按标准回答，让评分说话。」"]
+    ],
+    samples: [
+      ["强势单刀", "「比，必须比。但我建议别比功能清单——清单都能写满。就比一件事：您刚才说的 XX 场景，让三家各出一份落地方案，两周后摆在一起看。真功夫都在方案里。」"],
+      ["温和顾问", "「比较是对的。我建议比较三个维度：这个场景的落地能力、服务响应速度、和您现有系统的融合成本。维度和权重您来定，我按标准回答——如果比下来我们不是最优解，我会直说。」"]
+    ]
+  },
+  "更换成本高": {
+    steps: [
+      ["认同", "「更换成本是真实存在的，数据迁移、团队适应、流程切换都要花钱花时间。」——直面而非回避。"],
+      ["探究", "「您担心的成本里，哪块最大——数据、习惯还是流程？」——找到真正的成本大头。"],
+      ["重构", "把一次性切换重构为渐进式迁移：「不是搬家，是装修——老系统不动，新能力先跑，逐块切换。」"],
+      ["证据", "展示迁移方案的分阶段设计与回退机制，用过往客户的迁移周期数据佐证。"],
+      ["推进", "先跑零迁移成本模块：「第一期不碰老系统，只做增量，两周见效，您随时可以停。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，换系统的最大成本不是钱，是切换期没人兜底。所以我们的迁移方案有三个锁：分三阶段切、每阶段可回退、切换期双系统并行我们出人力盯。风险锁死了，剩下的只是时间问题。」"],
+      ["温和顾问", "「更换成本确实要算。我的建议是不做整体切换：第一期先上一个不依赖老系统的模块，两周见效，数据双轨并行。您觉得值，再逐块迁；觉得不值，随时停——沉没成本几乎为零。」"]
+    ]
+  },
+  "团队有人反对": {
+    steps: [
+      ["认同", "「反对声音很正常——工具是他们在用，他们的顾虑最值得听。」——尊重一线。"],
+      ["探究", "「反对最强烈的是哪个角色？他担心的是学习成本、被监控感，还是习惯被打破？」——不同原因不同解法。"],
+      ["重构", "把「新工具 vs 旧习惯」重构为「帮他减负」：「不是给他们加系统，是给他们减工作。」"],
+      ["证据", "找反对者使用场景里的痛点案例，让最反对的人参与试点并公开他的改变。"],
+      ["推进", "「让子弹飞一会」：先让支持者用出效果，用同侪压力替代行政命令。"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，团队反对我不怕，我怕没人反对——没人提意见的工具基本没人用。这样：找反对声音最大的那位，我单独给他演示一次，把他每天最烦的三件事解决掉。他要是还不改口，我再想别的办法。」"],
+      ["温和顾问", "「团队有顾虑太正常了。我的建议：不动全体，先找两三个愿意试的人用两周，把省时间的数据留下来。让团队自己看到变化，比自上而下推要顺得多。」"]
+    ]
+  },
+  "时机不对": {
+    steps: [
+      ["认同", "「时机确实重要，错峰上马比抢跑更稳。」——不反驳。"],
+      ["探究", "「您说的时机，是指业务忙季、内部调整期，还是预算周期？」——拆解时机的真实含义。"],
+      ["重构", "忙季恰是最佳验证期：「业务最忙的时候，恰恰是效率工具价值最大的时候——我们在这时候进场，效果最容易被看见。」"],
+      ["证据", "展示同类客户在忙季上线的案例与其平稳过渡的数据。"],
+      ["推进", "轻量启动策略：「现在只做两件事：签意向锁价格 + 免费做实施规划。等您窗口期一到，直接开跑。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，『时机不对』我听过很多次，但说实话——忙季才是效率工具最好的广告。业务最忙、人最痛的时候上线，两个月省下的时间看得见摸得着。淡季上线？效果没人感知，明年预算会上您都拿不出数据。」"],
+      ["温和顾问", "「可以等窗口期，但别浪费等待期。我建议现在先做实施规划——不影响业务、不占团队精力，等您忙过这阵直接开工，至少省一个月。窗口期我帮您盯，到了第一时间提醒您。」"]
+    ]
+  },
+  "个人顾虑": {
+    steps: [
+      ["认同", "「任何新决策都伴随个人风险，这不丢人，是人之常情。」——说出对方没说出口的。"],
+      ["探究", "不直接问（会冒犯），用假设探路：「如果项目推进，您希望自己在其中扮演什么角色？」"],
+      ["重构", "把「背锅的决策」重构为「露脸的机会」：「您是这个项目的操盘人，成了是您的政绩，我们的功劳簿上您排第一。」"],
+      ["证据", "提供降低个人风险的支持：定期汇报材料、阶段里程碑、随时可退出的设计。"],
+      ["推进", "给他安全网：「任何阶段您觉得不对，我们公开复盘归因，绝不会让您独自承担。」"]
+    ],
+    samples: [
+      ["强势单刀", "「王总，我干这行十年，见过太多项目成在产品、败在没人替它说话。所以我的承诺很简单：每月给您一页进展汇报，数据好您拿去汇报，数据不好我们先内部调整。功劳是您的，风险我们扛。」"],
+      ["温和顾问", "「这个决定对您个人也有分量——成了是业绩，不成您要面对质疑。所以我把节奏放缓：先小场景试点，每个月一页纸复盘。任何时候您觉得方向不对，我们随时调整或停下，绝不让您为难。」"]
+    ]
+  }
+};
+
+/* ==================================================================
+ * 逻辑层
+ * ================================================================== */
+const $ = id => document.getElementById(id);
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* Tab 切换 */
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    $("tab-" + btn.dataset.tab).classList.add("active");
+  };
+});
+
+/* 初始化下拉框 */
+Object.keys(INDUSTRIES).forEach(k => $("f-industry").add(new Option(k, k)));
+Object.keys(STAGES).forEach(k => $("f-stage").add(new Option(k, k)));
+
+/* Toast */
+let toastTimer;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+function copyText(text, btn) {
+  const done = () => { toast("✅ 已复制到剪贴板"); if (btn) { btn.textContent = "已复制"; setTimeout(() => btn.textContent = "复制", 1500); } };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+  ta.select(); document.execCommand("copy"); ta.remove(); done();
+}
+
+/* ---------- 作战方案生成 ---------- */
+const LOADING_STEPS = [
+  "正在分析客户角色与决策视角…",
+  "匹配行业话术样本库…",
+  "组装提问框架（SPIN 逻辑）…",
+  "预判本阶段高频异议…",
+  "生成下一步行动建议…"
+];
+
+let lastForm = null; // 记录场景，供「换一版」使用
+
+$("btn-generate").onclick = () => startGenerate(false);
+function startGenerate(isRegen) {
+  const form = isRegen ? lastForm : {
+    industry: $("f-industry").value,
+    role: $("f-role").value,
+    stage: $("f-stage").value,
+    goal: $("f-goal").value.trim()
+  };
+  if (!isRegen) lastForm = form;
+
+  const box = $("script-result");
+  box.innerHTML = `<div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text" id="load-txt">${LOADING_STEPS[0]}</div>
+    <div class="loading-sub">本地规则引擎模拟 · 预计 3 秒</div>
+  </div>`;
+
+  /* 轮播 loading 文案，模拟 AI 思考过程 */
+  let si = 0;
+  const sim = setInterval(() => {
+    si = (si + 1) % LOADING_STEPS.length;
+    const el = $("load-txt"); if (el) el.textContent = LOADING_STEPS[si];
+  }, 600);
+
+  setTimeout(() => { clearInterval(sim); renderPlan(composePlan(form)); }, 2400);
+}
+
+/* 核心组合逻辑：把四维场景参数组装为作战方案 */
+function composePlan(f) {
+  const ind = INDUSTRIES[f.industry], role = ROLES[f.role], stage = STAGES[f.stage];
+  return {
+    opening: `${rand(ind.hooks)}${f.goal ? `\n（本次目标锚点：${f.goal}——开场 30 秒内不谈产品，只谈他。）` : ""}`,
+    questions: role.questions,
+    value: `${rand(ind.values)}\n💡 针对当前角色：${role.lens}`,
+    plans: stage.plans,
+    next: stage.next
+  };
+}
+
+function renderPlan(p) {
+  const modules = [
+    { ico: "🎤", name: "开场白", tip: "≤100字 · 先聊他再聊你", html: escapeHtml(p.opening), plain: p.opening },
+    { ico: "❓", name: "提问框架", tip: "3 个递进式问题 · SPIN 逻辑", html: p.questions.map((q, i) => `<div class="q-item"><span class="q-num">Q${i + 1}</span><span>${escapeHtml(q[0])}<br><small style="color:var(--ink-3)">— ${escapeHtml(q[1])}</small></span></div>`).join(""), plain: p.questions.map(q => q[0]).join("\n") },
+    { ico: "💎", name: "价值主张", tip: "结合行业与角色 · 含量化锚点", html: escapeHtml(p.value), plain: p.value },
+    { ico: "🛡️", name: "异议预案", tip: "本阶段 Top 2 高频异议", html: p.plans.map(([o, r]) => `<div class="obj-pair"><div class="o">⚠️ ${escapeHtml(o)}</div><div class="r">${escapeHtml(r)}</div></div>`).join(""), plain: p.plans.map(([o, r]) => `${o}\n应对：${r}`).join("\n\n") },
+    { ico: "🚀", name: "下一步行动", tip: "1 个具体推进动作", html: escapeHtml(p.next), plain: p.next }
+  ];
+  const sceneTag = `${lastForm.industry} · ${lastForm.role} · ${lastForm.stage}`;
+
+  $("script-result").innerHTML = `
+    <div class="card">
+      <div class="result-head">
+        <div class="result-title">🗺️ 作战方案 <span class="tag">${escapeHtml(sceneTag)}</span></div>
+        <div class="result-actions">
+          <button class="btn-ghost" onclick="startGenerate(true)">🔄 换一版</button>
+          <button class="btn-ghost" onclick="copyText(document.getElementById('plan-plain').textContent)">📋 复制全部</button>
+        </div>
+      </div>
+      <div id="modules-box"></div>
+      <div id="plan-plain" style="display:none">${modules.map(m => `【${m.name}】\n${m.plain || ""}`).join("\n\n")}</div>
+    </div>`;
+
+  /* 逐模块渐次出现（模拟流式生成） */
+  const box = $("modules-box");
+  modules.forEach((m, i) => {
+    setTimeout(() => {
+      const div = document.createElement("div");
+      div.className = "module";
+      div.innerHTML = `
+        <div class="module-top">
+          <div class="module-ico">${m.ico}</div>
+          <div class="module-name">${m.name}</div>
+          <span class="module-tip">${m.tip}</span>
+          <button class="copy-btn">复制</button>
+        </div>
+        <div class="module-body">${m.html}</div>`;
+      div.querySelector(".copy-btn").onclick = e => copyText(div.querySelector(".module-body").innerText, e.target);
+      box.appendChild(div);
+    }, i * 420);
+  });
+}
+function escapeHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+/* ==================================================================
+ * 🔌 接入真实 LLM 的位置（生产环境实现）
+ *
+ * async function generateWithLLM(form) {
+ *   const res = await fetch("/api/v1/scripts/generate", {
+ *     method: "POST",
+ *     headers: { "Content-Type": "application/json" },
+ *     body: JSON.stringify(form)   // { industry, role, stage, goal }
+ *   });
+ *   // 后端为 SSE 流式返回（见 docs/06-技术方案 §3.2）
+ *   const reader = res.body.getReader();
+ *   ... 逐模块解析 event: module 并调用 renderPlan
+ * }
+ * 替换 composePlan(form) 为 await generateWithLLM(form) 即可，
+ * 前端渲染逻辑无需任何改动。
+ * ================================================================== */
+
+/* ---------- 异议库 ---------- */
+const objGrid = $("obj-grid");
+Object.keys(OBJECTIONS).forEach((k, i) => {
+  const b = document.createElement("button");
+  b.className = "obj-chip"; b.textContent = k;
+  b.onclick = () => renderObjection(k, b);
+  objGrid.appendChild(b);
+});
+
+function renderObjection(key, chip) {
+  document.querySelectorAll(".obj-chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  const o = OBJECTIONS[key];
+  const stepNames = ["认同", "探究", "重构", "证据", "推进"];
+  $("obj-detail").innerHTML = `
+    <div class="card">
+      <div class="result-head">
+        <div class="result-title">🛡️ 「${escapeHtml(key)}」应对策略</div>
+        <button class="btn-ghost" onclick="copyText(document.querySelector('#obj-detail .card').innerText)">📋 复制全部</button>
+      </div>
+      <div class="step-flow">
+        ${stepNames.map((s, i) => `<div class="step-pill">STEP ${i + 1}<small>${s}</small></div>`).join("")}
+      </div>
+      ${o.steps.map(([name, desc], i) => `
+        <div class="step-card">
+          <div class="step-no">${i + 1}</div>
+          <div><b>${escapeHtml(name)}</b><p>${escapeHtml(desc)}</p></div>
+        </div>`).join("")}
+      <div style="height:14px"></div>
+      <b style="font-size:14px">💬 话术示例</b>
+      ${o.samples.map(([tone, script]) => `
+        <div class="script-sample"><span class="tone">${escapeHtml(tone)}</span><p>${escapeHtml(script)}</p></div>`).join("")}
+    </div>`;
+}
+
+/* ---------- 跟进邮件 ---------- */
+let tone = "正式专业";
+document.querySelectorAll("#e-tone button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#e-tone button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active"); tone = b.dataset.tone;
+  };
+});
+
+const TONES = {
+  "正式专业": {
+    greet: n => `尊敬的${n}：`,
+    close: n => `顺祝商祺。\n\nXX（您的姓名）\nXX公司 · 联系电话`,
+    thanks: n => `感谢您今天抽出时间与我们深入交流。`,
+    bridge: `基于本次沟通`,
+    next: `期待您的回复，如有任何疑问，欢迎随时与我联系。`
+  },
+  "亲切自然": {
+    greet: n => `${n}您好：`,
+    close: n => `祝顺利！\n\nXX（您的姓名）\n微信/电话同号，随时找我`,
+    thanks: n => `今天和您聊得非常投机，感谢您的时间！`,
+    bridge: `按照咱们今天聊的`,
+    next: `您先看看，有任何想法随时微信上喊我～`
+  },
+  "简洁干练": {
+    greet: n => `${n}：`,
+    close: n => `XX（您的姓名）\nXX公司`,
+    thanks: n => `感谢今天 30 分钟的沟通，直接说结论：`,
+    bridge: `已确认事项如下`,
+    next: `请确认上述时间与分工，如有调整请直接回复本邮件。`
+  }
+};
+
+$("btn-email").onclick = () => {
+  const name = $("e-name").value.trim() || "王总";
+  const points = $("e-points").value.split("\n").map(s => s.trim()).filter(Boolean);
+  if (!points.length) { toast("请先填写沟通要点"); return; }
+
+  const box = $("email-result");
+  box.innerHTML = `<div class="loading-box"><div class="spinner"></div><div class="loading-text">正在组织邮件结构…</div><div class="loading-sub">四段式 · 感谢回顾 / 共识 / 价值强化 / 下一步</div></div>`;
+
+  setTimeout(() => {
+    const T = TONES[tone];
+    const subject = `【跟进】${points[0].slice(0, 14)}${points[0].length > 14 ? "…" : ""} · ${new Date().getMonth() + 1}月${new Date().getDate()}日沟通小结`;
+    const body =
+      `${T.greet(name)}\n\n` +
+      `${T.thanks(name)}${tone === "简洁干练" ? "\n" : "\n\n"}` +
+      `一、${T.bridge}，双方确认以下要点：\n${points.map((p, i) => `${i + 1}. ${p}；`).join("\n")}\n\n` +
+      `二、接下来我们会：\n· 针对您提出的问题，在约定时间内给出具体方案与时间表；\n· 主动同步进展，您无需追问我。\n\n` +
+      `三、建议的下一步：本周内确认方案细节，为后续推进留出充分时间。\n\n` +
+      `${T.next}\n\n${T.close(name)}`;
+
+    box.innerHTML = `
+      <div class="card">
+        <div class="result-head">
+          <div class="result-title">📨 邮件草稿 <span class="tag">${escapeHtml(tone)}</span></div>
+          <div class="result-actions"><button class="btn-ghost" id="btn-copy-mail">📋 复制邮件</button></div>
+        </div>
+        <div class="email-subject"><span class="lbl">主题</span><p>${escapeHtml(subject)}</p></div>
+        <div class="email-body" id="mail-body">${escapeHtml(body)}</div>
+      </div>`;
+    $("btn-copy-mail").onclick = e => copyText(`主题：${subject}\n\n${body}`, e.target);
+  }, 1600);
+};
+</script>
+</body>
+</html>
