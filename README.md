@@ -2,7 +2,7 @@
 
 > **为 B2B 销售团队打造的 AI 话术与跟单助手 —— 把 Top Sales 的经验，变成每个销售都能用的武器。**
 
-[![原型 Demo](https://img.shields.io/badge/%E5%8F%AF%E4%BA%A4%E4%BA%92%E5%8E%9F%E5%9E%8B-Demo%20%E2%86%92-blueviolet)](./demo/index.html)
+[![原型 Demo](https://img.shields.io/badge/%E5%8F%AF%E4%BA%A4%E4%BA%92%E5%8E%9F%E5%9E%8B-Demo%20%E2%86%92-blueviolet)](https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -11,7 +11,7 @@
 
 这是一个**完整的产品经理作品集项目**：以「B2B 销售团队的 AI 赋能」为命题，覆盖从用户调研、需求分析、产品路线规划、用户流程设计、PRD 撰写，到面向研发的内部技术方案的全流程，并附带一个**可直接打开交互的原型 Demo**。
 
-> ⚠️ **作品集声明**：本项目为个人作品集性质的模拟产品案例。调研方法、分析框架、文档结构均按真实产品流程构建，文中访谈样本与数据为案例设定，用于完整展示产品工作方法。
+> 📌 **关于本项目**：这是一个个人能力展示作品集。我在过程中按真实产品经理的工作方法（用户调研 → 需求分析 → 路线规划 → PRD → 技术方案）完成了完整链路。文中展示的人物访谈与数据为案例设定，目的是连贯呈现完整的产品决策过程——而非声称这是一个已上线的真实产品。
 
 ## 🎯 为什么做这个产品
 
@@ -33,7 +33,7 @@
 | 04 | [用户流程与体验设计](./docs/04-用户流程与体验设计.md) | 用户流程图、客户旅程图 | 设计体验 |
 | 05 | [产品需求文档 PRD](./docs/05-PRD-产品需求文档.md) | 结构化需求撰写、验收标准定义 | 精确定义 |
 | 06 | [技术方案与内部设计](./docs/06-技术方案与内部设计.md) | 架构理解、API/数据模型、研发协作 | 推动落地 |
-| 🎮 | [原型 Demo](./demo/index.html) | 交互原型、前端实现 | 可用验证 |
+| 🎮 | [原型 Demo](https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/) | 交互原型、前端实现 | 可用验证 |
 
 ## 🎮 原型 Demo
 
@@ -55,22 +55,6 @@
 | 原型实现 | HTML / CSS / 原生 JavaScript |
 | 文档协作 | Markdown + Git 版本管理 |
 
-## 📂 目录结构
-
-```
-SalesMate/
-├── README.md                        # 本文件：项目门面与导航
-├── docs/
-│   ├── 01-市场与用户调研.md          # 访谈、问卷、Persona、痛点分析
-│   ├── 02-需求分析与优先级.md        # 需求池、KANO、RICE、MVP 范围
-│   ├── 03-产品路线图.md             # V1.0 → V2.0 版本规划
-│   ├── 04-用户流程与体验设计.md      # 用户流程图、客户旅程图
-│   ├── 05-PRD-产品需求文档.md       # 结构化 PRD（含验收标准）
-│   └── 06-技术方案与内部设计.md      # 架构、API、数据模型、排期
-└── demo/
-    └── index.html                   # 可交互原型（单文件，零依赖）
-```
-
 ## 🚀 如何运行
 
 ```bash
@@ -82,22 +66,13 @@ cd demo && python3 -m http.server 8080
 # 浏览器访问 http://localhost:8080
 ```
 
-## 🌐 部署到 GitHub Pages（让简历里的链接直接可访问）
+## 🌐 在线演示
 
-1. 在 GitHub 创建仓库（建议命名 `SalesMate` 或 `ai-sales-assistant-portfolio`）
-2. 推送代码：
+本项目已通过 GitHub Pages 部署，点击即可访问：
 
-```bash
-git init
-git add .
-git commit -m "feat: SalesMate AI 销售助手产品作品集 V1.0"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/SalesMate.git
-git push -u origin main
-```
+**👉 https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/**
 
-3. 仓库 **Settings → Pages → Source 选择 `main` 分支 / root**，保存
-4. 约 1 分钟后访问 `https://<你的用户名>.github.io/SalesMate/demo/` 即可在线演示
+如需自行部署，fork 本仓库后，在仓库 **Settings → Pages → Source** 中选择 `main` 分支 / root 即可。
 
 ## License
 
