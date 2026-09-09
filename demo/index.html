@@ -64,6 +64,16 @@ nav button.active { color: #fff; background: linear-gradient(135deg, var(--brand
   border: 1px solid #FDE68A; background: #FFFBEB;
   padding: 4px 10px; border-radius: 999px; white-space: nowrap;
 }
+.engine-toggle {
+  cursor: pointer; transition: all .2s; user-select: none;
+  font-family: inherit;
+}
+.engine-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.18); }
+.engine-toggle.llm {
+  color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-color: transparent; box-shadow: 0 4px 12px rgba(79,70,229,.3);
+}
+.engine-toggle.llm:hover { box-shadow: 0 6px 18px rgba(79,70,229,.45); }
 
 /* ---------- 布局 ---------- */
 main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
@@ -225,7 +235,7 @@ footer b { color: var(--ink-2); }
       <button data-tab="objection">🛡️ 异议应对</button>
       <button data-tab="email">📧 跟进邮件</button>
     </nav>
-    <span class="badge">原型演示版 · 本地规则引擎</span>
+    <span class="badge engine-toggle" id="engine-badge" onclick="toggleEngine()" title="点击切换引擎">🔌 本地演示 · 点击切换</span>
   </div>
 </header>
 
@@ -641,6 +651,107 @@ const OBJECTIONS = {
 };
 
 /* ==================================================================
+ * 🔌 真实 LLM 引擎（DeepSeek API · OpenAI 兼容协议）
+ * 用法：点击顶栏「本地演示」切换为「真实 LLM」，首次会提示输入 API key
+ *       key 存到 localStorage，刷新后无需重新输入
+ * 申请：https://platform.deepseek.com/ （注册即送 ¥1 额度）
+ * ================================================================== */
+const LLM_CONFIG = {
+  apiKey: localStorage.getItem('salesmate_apikey') || '',
+  baseUrl: 'https://api.deepseek.com/v1/chat/completions',
+  model: 'deepseek-chat',
+  enabled: localStorage.getItem('salesmate_llm_enabled') === '1'
+};
+
+const SALESMATE_SYSTEM_PROMPT = `你是 SalesMate —— 一位拥有 12 年 B2B 销售经验的资深销售教练，曾在 SaaS、制造业、医疗、金融等行业操盘过千万级大单。
+
+【你的风格】
+- 直接、有洞察、给可执行的话术，而不是空洞的"建议"
+- 站在"见客户前 5 分钟"的角度，每句话都要能直接对着客户说
+- 站在"行家"的视角：客户没问的你也替他想好，客户会问的你提前布好答案
+- 拒绝空话、套话、正确的废话
+
+【回复格式】
+- 严格按 JSON 格式返回，方便程序解析
+- 不要加 markdown 代码块标记（如 \`\`\`json）
+- 不要寒暄、不要解释、不要免责声明`;
+
+/* 切换引擎 */
+function toggleEngine() {
+  if (LLM_CONFIG.enabled) {
+    LLM_CONFIG.enabled = false;
+    localStorage.setItem('salesmate_llm_enabled', '0');
+    updateEngineBadge();
+    toast('已切换为本地演示模式');
+  } else {
+    if (!LLM_CONFIG.apiKey) {
+      const key = prompt('启用真实 LLM 模式（DeepSeek API）\n\n请粘贴你的 API key（格式：sk-...）\n\n· 申请地址：https://platform.deepseek.com/\n· ¥1 额度够用一个月\n· key 仅保存在你浏览器本地，不上传任何服务器');
+      if (!key || !key.trim()) return;
+      LLM_CONFIG.apiKey = key.trim();
+      localStorage.setItem('salesmate_apikey', LLM_CONFIG.apiKey);
+    }
+    LLM_CONFIG.enabled = true;
+    localStorage.setItem('salesmate_llm_enabled', '1');
+    updateEngineBadge();
+    toast('✅ 已启用真实 LLM 模式');
+  }
+}
+
+function updateEngineBadge() {
+  const badge = $('engine-badge');
+  if (LLM_CONFIG.enabled) {
+    badge.className = 'badge engine-toggle llm';
+    badge.innerHTML = '⚡ 真实 LLM（DeepSeek）';
+  } else {
+    badge.className = 'badge engine-toggle';
+    badge.innerHTML = '🔌 本地演示 · 点击切换';
+  }
+}
+
+/* 调用 LLM */
+async function callLLM(userPrompt) {
+  if (!LLM_CONFIG.apiKey) throw new Error('API key 未设置');
+  const res = await fetch(LLM_CONFIG.baseUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + LLM_CONFIG.apiKey
+    },
+    body: JSON.stringify({
+      model: LLM_CONFIG.model,
+      messages: [
+        { role: 'system', content: SALESMATE_SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    })
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error('API ' + res.status + ': ' + errText.slice(0, 150));
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+/* 从 LLM 输出中提取 JSON（处理可能包了 markdown code block 的情况） */
+function extractJSON(text) {
+  let s = text.trim();
+  if (s.startsWith('```')) {
+    s = s.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+  }
+  // Try direct parse
+  try { return JSON.parse(s); } catch (e) {}
+  // Try to find JSON object
+  const m = s.match(/\{[\s\S]*\}/);
+  if (m) {
+    try { return JSON.parse(m[0]); } catch (e) {}
+  }
+  throw new Error('LLM 返回内容无法解析为 JSON：' + text.slice(0, 100));
+}
+
+/* ==================================================================
  * 逻辑层
  * ================================================================== */
 const $ = id => document.getElementById(id);
@@ -688,7 +799,7 @@ const LOADING_STEPS = [
 let lastForm = null; // 记录场景，供「换一版」使用
 
 $("btn-generate").onclick = () => startGenerate(false);
-function startGenerate(isRegen) {
+async function startGenerate(isRegen) {
   const form = isRegen ? lastForm : {
     industry: $("f-industry").value,
     role: $("f-role").value,
@@ -701,7 +812,7 @@ function startGenerate(isRegen) {
   box.innerHTML = `<div class="loading-box">
     <div class="spinner"></div>
     <div class="loading-text" id="load-txt">${LOADING_STEPS[0]}</div>
-    <div class="loading-sub">本地规则引擎模拟 · 预计 3 秒</div>
+    <div class="loading-sub">${LLM_CONFIG.enabled ? '⚡ 真实 LLM（DeepSeek）正在生成…' : '本地规则引擎模拟 · 预计 3 秒'}</div>
   </div>`;
 
   /* 轮播 loading 文案，模拟 AI 思考过程 */
@@ -711,7 +822,49 @@ function startGenerate(isRegen) {
     const el = $("load-txt"); if (el) el.textContent = LOADING_STEPS[si];
   }, 600);
 
-  setTimeout(() => { clearInterval(sim); renderPlan(composePlan(form)); }, 2400);
+  /* 分支：真实 LLM 或 本地规则 */
+  if (LLM_CONFIG.enabled) {
+    try {
+      const llmLoading = ['正在调用 DeepSeek…', 'AI 正在分析客户角色…', '匹配行业话术样本…', '组装提问框架…', '预判本阶段高频异议…', '生成下一步行动…'];
+      let lli = 0;
+      const llmSim = setInterval(() => {
+        lli = (lli + 1) % llmLoading.length;
+        const el = $("load-txt"); if (el) el.textContent = llmLoading[lli];
+      }, 900);
+      
+      const prompt = `请基于以下客户场景，生成一份 B2B 销售作战方案：
+
+【行业】${form.industry}
+【客户角色】${form.role}
+【沟通阶段】${form.stage}
+${form.goal ? `【本次目标】${form.goal}` : ''}
+
+请按以下 JSON 格式返回（不要加任何解释、不要用 markdown 代码块）：
+{
+  "opening": "一段 80-120 字的自然开场白，要像真人对着客户说话，不要空话。",
+  "questions": [["Q1 主问题", "Q1 的追问引导（5-15字）"], ["Q2", "..."], ["Q3", "..."]],
+  "value": "价值主张（150-250 字）：先讲客户的现状/痛点，再讲你带来的具体改变，最好有量化锚点或类比。",
+  "plans": [["本阶段最可能出现的异议 1", "应对策略（30-50 字）"], ["异议 2", "应对策略"]],
+  "next": "一个具体可执行的下一步行动（含时间点或交付物）"
+}`;
+      const text = await callLLM(prompt);
+      clearInterval(llmSim);
+      clearInterval(sim);
+      const plan = extractJSON(text);
+      renderPlan(plan);
+    } catch (e) {
+      clearInterval(sim);
+      box.innerHTML = `<div class="empty" style="border-color:#FCA5A5;background:#FEF2F2;color:#991B1B">
+        <div class="icon">⚠️</div>
+        <b>真实 LLM 调用失败</b>
+        <p style="color:#7F1D1D">${escapeHtml(e.message)}</p>
+        <p style="font-size:12px;margin-top:8px;color:#991B1B">💡 检查：① API key 是否正确 ② 余额是否充足 ③ 网络是否能访问 api.deepseek.com</p>
+        <button class="btn-ghost" onclick="toggleEngine()" style="margin-top:8px">切回本地演示模式</button>
+      </div>`;
+    }
+  } else {
+    setTimeout(() => { clearInterval(sim); renderPlan(composePlan(form)); }, 2400);
+  }
 }
 
 /* 核心组合逻辑：把四维场景参数组装为作战方案 */
@@ -855,13 +1008,50 @@ const TONES = {
   }
 };
 
-$("btn-email").onclick = () => {
+$("btn-email").onclick = async () => {
   const name = $("e-name").value.trim() || "王总";
   const points = $("e-points").value.split("\n").map(s => s.trim()).filter(Boolean);
   if (!points.length) { toast("请先填写沟通要点"); return; }
 
   const box = $("email-result");
-  box.innerHTML = `<div class="loading-box"><div class="spinner"></div><div class="loading-text">正在组织邮件结构…</div><div class="loading-sub">四段式 · 感谢回顾 / 共识 / 价值强化 / 下一步</div></div>`;
+  box.innerHTML = `<div class="loading-box"><div class="spinner"></div><div class="loading-text">${LLM_CONFIG.enabled ? '⚡ DeepSeek 正在起草邮件…' : '正在组织邮件结构…'}</div><div class="loading-sub">${LLM_CONFIG.enabled ? '真实 LLM · 约 5-10 秒' : '四段式 · 感谢回顾 / 共识 / 价值强化 / 下一步'}</div></div>`;
+
+  if (LLM_CONFIG.enabled) {
+    try {
+      const prompt = `请基于以下沟通要点，写一封 B2B 销售跟进邮件。
+
+【客户称呼】${name}
+【语气风格】${tone}
+【沟通要点】
+${points.map((p, i) => `${i+1}. ${p}`).join('\n')}
+
+请按以下 JSON 格式返回（不要用 markdown 代码块、不要加解释）：
+{
+  "subject": "邮件主题（15-25 字，含日期或关键词）",
+  "body": "邮件正文（300-500 字，按四段式：感谢回顾 → 双方共识 → 价值强化 → 明确下一步；称呼用 ${name}，落款用 XX（您的姓名））"
+}`;
+      const text = await callLLM(prompt);
+      const mail = extractJSON(text);
+      box.innerHTML = `
+        <div class="card">
+          <div class="result-head">
+            <div class="result-title">📨 邮件草稿 <span class="tag">${escapeHtml(tone)} · AI</span></div>
+            <div class="result-actions"><button class="btn-ghost" id="btn-copy-mail">📋 复制邮件</button></div>
+          </div>
+          <div class="email-subject"><span class="lbl">主题</span><p>${escapeHtml(mail.subject)}</p></div>
+          <div class="email-body" id="mail-body">${escapeHtml(mail.body)}</div>
+        </div>`;
+      $("btn-copy-mail").onclick = e => copyText(`主题：${mail.subject}\n\n${mail.body}`, e.target);
+    } catch (e) {
+      box.innerHTML = `<div class="empty" style="border-color:#FCA5A5;background:#FEF2F2;color:#991B1B">
+        <div class="icon">⚠️</div>
+        <b>LLM 调用失败</b>
+        <p style="color:#7F1D1D">${escapeHtml(e.message)}</p>
+        <button class="btn-ghost" onclick="toggleEngine()" style="margin-top:8px">切回本地演示模式</button>
+      </div>`;
+    }
+    return;
+  }
 
   setTimeout(() => {
     const T = TONES[tone];
@@ -886,6 +1076,9 @@ $("btn-email").onclick = () => {
     $("btn-copy-mail").onclick = e => copyText(`主题：${subject}\n\n${body}`, e.target);
   }, 1600);
 };
+
+/* 初始化引擎 badge 状态 */
+updateEngineBadge();
 </script>
 </body>
 </html>
