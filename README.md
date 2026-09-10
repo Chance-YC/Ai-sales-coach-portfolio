@@ -2,7 +2,7 @@
 
 > **为 B2B 销售团队打造的 AI 话术与跟单助手 —— 把 Top Sales 的经验，变成每个销售都能用的武器。**
 
-[![原型 Demo](https://img.shields.io/badge/%E5%8F%AF%E4%BA%A4%E4%BA%92%E5%8E%9F%E5%9E%8B-Demo%20%E2%86%92-blueviolet)](https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/)
+[![原型 Demo](https://img.shields.io/badge/%E5%8F%AF%E4%BA%A4%E4%BA%92%E5%8E%9F%E5%9E%8B-Demo%20%E2%86%92-blueviolet)](https://Chance-YC.github.io/Ai-sales-coach-portfolio/demo/)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -33,7 +33,7 @@
 | 04 | [用户流程与体验设计](./docs/04-用户流程与体验设计.md) | 用户流程图、客户旅程图 | 设计体验 |
 | 05 | [产品需求文档 PRD](./docs/05-PRD-产品需求文档.md) | 结构化需求撰写、验收标准定义 | 精确定义 |
 | 06 | [技术方案与内部设计](./docs/06-技术方案与内部设计.md) | 架构理解、API/数据模型、研发协作 | 推动落地 |
-| 🎮 | [原型 Demo](https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/) | 交互原型、前端实现 | 可用验证 |
+| 🎮 | [原型 Demo](https://Chance-YC.github.io/Ai-sales-coach-portfolio/demo/) | 交互原型、前端实现 | 可用验证 |
 
 ## 🎮 原型 Demo
 
@@ -70,7 +70,7 @@ cd demo && python3 -m http.server 8080
 
 本项目已通过 GitHub Pages 部署，点击即可访问：
 
-**👉 https://Chance-YC.github.io/ai-sales-coach-portfolio/demo/**
+**👉 https://Chance-YC.github.io/Ai-sales-coach-portfolio/demo/**
 
 如需自行部署，fork 本仓库后，在仓库 **Settings → Pages → Source** 中选择 `main` 分支 / root 即可。
 
