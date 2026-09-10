@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="zh-CN" data-page-node-id="xv2tD0G6GXMVIGy9EDuGyp">
+<head data-page-node-id="i80YXmly1GATfunakMFRJO">
+<meta charset="UTF-8" data-page-node-id="zVx8Ms8I15fCREOTZDbAti">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="96DmMWILyJYwFaDmDiWNMp">
 <title>SalesMate · AI 销售作战助手</title>
 <style>
 /* ============================================================
@@ -183,6 +183,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
 }
 .obj-chip:hover { border-color: var(--brand); color: var(--brand); }
 .obj-chip.active { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(79,70,229,.3); }
+.custom-obj { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--line); }
 .step-flow { display: flex; gap: 6px; margin: 14px 0 18px; flex-wrap: wrap; }
 .step-pill {
   flex: 1; min-width: 88px; text-align: center; padding: 10px 6px; border-radius: 10px;
@@ -222,115 +223,122 @@ footer { border-top: 1px solid var(--line); padding: 28px 24px; text-align: cent
 footer b { color: var(--ink-2); }
 </style>
 </head>
-<body>
+<body data-page-node-id="salCPwxEmjYi9pGSvDbjM3">
 
-<header>
-  <div class="header-inner">
-    <div class="logo">
-      <div class="logo-mark">⚡</div>
-      <div>SalesMate<small>销售智囊 · AI 作战助手</small></div>
+<header data-page-node-id="RYmGmlHDtZiFlzQRGxQGnd">
+  <div class="header-inner" data-page-node-id="aAnUV0VIgrAybstmzyegIN">
+    <div class="logo" data-page-node-id="tDh18YMvmmuAYaqU7bZ2mZ">
+      <div class="logo-mark" data-page-node-id="BX0FR9G0x6EBsXahlbIpo1">⚡</div>
+      <div data-page-node-id="doEupkrhiJ04AdkLCHNGST">SalesMate<small data-page-node-id="p6BREAMWV2EvqoxEuOLqGI">销售智囊 · AI 作战助手</small></div>
     </div>
-    <nav>
-      <button class="active" data-tab="script">🎯 作战方案</button>
-      <button data-tab="objection">🛡️ 异议应对</button>
-      <button data-tab="email">📧 跟进邮件</button>
+    <nav data-page-node-id="Bo67HICZAFA7nyJL5Acxas">
+      <button class="active" data-tab="script" data-page-node-id="BkGFhzteplcBDP85FeYNCG">🎯 作战方案</button>
+      <button data-tab="objection" data-page-node-id="GZTSOMYPZ5QuOOAY0WOGrL">🛡️ 异议应对</button>
+      <button data-tab="email" data-page-node-id="qC9e8MdwK8TT2XXxvxNu8G">📧 跟进邮件</button>
     </nav>
-    <span class="badge engine-toggle" id="engine-badge" onclick="toggleEngine()" title="点击切换引擎">🔌 本地演示 · 点击切换</span>
+    <span class="badge engine-toggle" id="engine-badge" onclick="toggleEngine()" title="点击切换引擎" data-page-node-id="VE1A66JgEfcgWUAaeJwyL6">🔌 本地演示 · 点击切换</span>
   </div>
 </header>
 
-<main>
-  <div class="hero">
-    <h1>见客户前 <em>5 分钟</em>，拿到一份能直接用的作战方案</h1>
-    <p>选择客户场景，AI 为你生成开场白 · 提问框架 · 价值主张 · 异议预案 · 下一步行动</p>
-    <div class="hint">💡 本原型内置本地规则引擎模拟生成 · 接入真实 LLM 见代码注释</div>
+<main data-page-node-id="8xhxQ6QZe1oKzaZ5R47BOC">
+  <div class="hero" data-page-node-id="an033qQFYibQnHXdqgJibZ">
+    <h1 data-page-node-id="nSmK2uWf9eX1uLMydDY9Yr">见客户前 <em data-page-node-id="gUa6XyAWkdna3MjdzhMyo8">5 分钟</em>，拿到一份能直接用的作战方案</h1>
+    <p data-page-node-id="2GlDbvHtuKG9ekEFWgYrHp">选择客户场景，AI 为你生成开场白 · 提问框架 · 价值主张 · 异议预案 · 下一步行动</p>
+    <div class="hint" data-page-node-id="oeKxvj3t6HrDC8hkaZpFIa">💡 内置本地规则引擎 · 点击顶栏「🔌」切换真实 LLM（DeepSeek）</div>
   </div>
 
   <!-- ================= Tab 1 · 作战方案 ================= -->
-  <section class="tab-panel active" id="tab-script">
-    <div class="grid">
-      <div class="card">
-        <h2>🎯 客户场景</h2>
-        <div class="sub">输入越具体，方案越可用</div>
-        <div class="field">
-          <label>客户所在行业<span class="req">*</span></label>
-          <select id="f-industry"></select>
+  <section class="tab-panel active" id="tab-script" data-page-node-id="luT4Wpx1OgoAMxdB1hMDgb">
+    <div class="grid" data-page-node-id="pDEAXXNCS5LSR99YUHvPM8">
+      <div class="card" data-page-node-id="pwRhJOsAsm5BRfQIbsvwGi">
+        <h2 data-page-node-id="bfEDhQaCIGTEW473GXHSsk">🎯 客户场景</h2>
+        <div class="sub" data-page-node-id="QRcllu2DfzOaQqOxxwJlSm">输入越具体，方案越可用</div>
+        <div class="field" data-page-node-id="Qsvm6qGWUCO7wCxq4oaw3t">
+          <label data-page-node-id="AB1DDmYvB9t7HlkhCuySex">客户所在行业<span class="req" data-page-node-id="a0cLJOBilpfqjpdsVGANeB">*</span></label>
+          <select id="f-industry" data-page-node-id="JRnUjR9aezEFlcMkbQBjkt"></select>
         </div>
-        <div class="field">
-          <label>客户角色<span class="req">*</span></label>
-          <select id="f-role">
-            <option value="决策者">决策者（老板 / 总经理 / 事业部负责人）</option>
-            <option value="影响者">影响者（部门经理 / 技术负责人）</option>
-            <option value="使用者">使用者（一线员工 / 实际操作者）</option>
+        <div class="field" data-page-node-id="dFo7LnHavt5y5SH9EnR3Bs">
+          <label data-page-node-id="70i6Cxza7hX46WrNKG6hy2">客户角色<span class="req" data-page-node-id="5sSa0gNFTPplppUg4tzBKI">*</span></label>
+          <select id="f-role" data-page-node-id="gl9HYcIS6RVXEa1LHITuxU">
+            <option value="决策者" data-page-node-id="UDvK1iznQF2h8SEtkPnNFS">决策者（老板 / 总经理 / 事业部负责人）</option>
+            <option value="影响者" data-page-node-id="Z2HQdHPcqC3EFG4oRE5VEy">影响者（部门经理 / 技术负责人）</option>
+            <option value="使用者" data-page-node-id="Mqm10xf76fFHlCV6XQhLVM">使用者（一线员工 / 实际操作者）</option>
           </select>
         </div>
-        <div class="field">
-          <label>沟通阶段<span class="req">*</span></label>
-          <select id="f-stage"></select>
+        <div class="field" data-page-node-id="YvRdZm4ZA0NrPhRPkCYpGw">
+          <label data-page-node-id="e6hFzL14DvnRsg03OFp8AR">沟通阶段<span class="req" data-page-node-id="AyS6Fo1j3Do28zLEKxHjR7">*</span></label>
+          <select id="f-stage" data-page-node-id="eyfGXshrU1DyLAT1NR4OOO"></select>
         </div>
-        <div class="field">
-          <label>本次目标（选填，一句话）</label>
-          <input type="text" id="f-goal" maxlength="50" placeholder="例：约到决策层汇报会">
+        <div class="field" data-page-node-id="Xv5GBc1q5O9HG2cBKaEMiA">
+          <label data-page-node-id="1BFw1SYsEQF4A7v57GLakb">本次目标（选填，一句话）</label>
+          <input type="text" id="f-goal" maxlength="50" placeholder="例：约到决策层汇报会" data-page-node-id="VGPnJlufCxeVfMuB2x8kDE">
         </div>
-        <button class="btn-primary" id="btn-generate">⚡ 生成作战方案</button>
+        <button class="btn-primary" id="btn-generate" data-page-node-id="wX6OpvzfbjJQUWDFy48qEu">⚡ 生成作战方案</button>
       </div>
-      <div id="script-result">
-        <div class="empty">
-          <div class="icon">🗺️</div>
-          <b>作战方案将在这里生成</b>
-          <p>填好左侧场景，点击「生成作战方案」。每个模块可单独复制，支持「换一版」重新生成。</p>
+      <div id="script-result" data-page-node-id="jAI4B9oS7TOtpOR5jHBTCT">
+        <div class="empty" data-page-node-id="0VlcTKrlCT8zznBIpZ8M56">
+          <div class="icon" data-page-node-id="h5rSDqZrVVDmP1mVKBLfwn">🗺️</div>
+          <b data-page-node-id="jjvY2NaEugVYgj7m9d3gQ0">作战方案将在这里生成</b>
+          <p data-page-node-id="95JDV6Vk4JKFZ3OaDtOaO7">填好左侧场景，点击「生成作战方案」。每个模块可单独复制，支持「换一版」重新生成。</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ================= Tab 2 · 异议应对 ================= -->
-  <section class="tab-panel" id="tab-objection">
-    <div class="card" style="margin-bottom:20px">
-      <h2>🛡️ 高频异议库</h2>
-      <div class="sub">点击异议，查看五步应对法 —— 认同 · 探究 · 重构 · 证据 · 推进</div>
-      <div class="obj-grid" id="obj-grid"></div>
+  <section class="tab-panel" id="tab-objection" data-page-node-id="JZxBUDe0fK7MkDIUBknyN2">
+    <div class="card" style="margin-bottom:20px" data-page-node-id="peDUtidhosne0EicS7Cu55">
+      <h2 data-page-node-id="8HzBTOXLYUhd4hqCaRnIQb">🛡️ 高频异议库</h2>
+      <div class="sub" data-page-node-id="8RiL03cm9VdxUSNAr2M8Jl">点击异议，查看五步应对法 —— 认同 · 探究 · 重构 · 证据 · 推进</div>
+      <div class="obj-grid" id="obj-grid" data-page-node-id="3FikGPndULhzCCuZou2bQw"></div>
+      <div class="custom-obj" data-page-node-id="I4M2BWjt8GckuaDnMpOl77">
+        <div class="field" style="margin-bottom:12px" data-page-node-id="HRWEq4UArWGDpis4yAk9aw">
+          <label data-page-node-id="1DbqiGzd4RyEA4pwURRIaF">💬 自定义异议（选填，真实 LLM 模式可用）</label>
+          <input type="text" id="obj-custom" maxlength="80" placeholder="例：客户说「你们公司成立才两年，怕服务跟不上」" data-page-node-id="WEY8pZF7rQLxzmwHGx0wqE">
+        </div>
+        <button class="btn-primary" id="btn-objection-custom" style="padding:11px" data-page-node-id="3XCV9dEudYy4HEGuybSewh">✨ 生成应对策略</button>
+      </div>
     </div>
-    <div id="obj-detail"><div class="empty"><div class="icon">👆</div><b>请选择一个客户异议</b><p>12 类 B2B 销售最高频异议，每个附五步应对策略与两版话术示例（强势单刀 / 温和顾问）</p></div></div>
+    <div id="obj-detail" data-page-node-id="RUAjpgVtYwPKhbDFzhzh6C"><div class="empty" data-page-node-id="tpCkJkv2V4DYSBGgsx0iYe"><div class="icon" data-page-node-id="YFXOlW8a6MipQMAkH9SGHM">👆</div><b data-page-node-id="juelqCaemEwpisvOuVX529">请选择一个客户异议</b><p data-page-node-id="25SOP5doOegGuuEzIXsa7R">12 类 B2B 销售最高频异议，每个附五步应对策略与两版话术示例（强势单刀 / 温和顾问）。切换到真实 LLM 后，还可输入任意自定义异议。</p></div></div>
   </section>
 
   <!-- ================= Tab 3 · 跟进邮件 ================= -->
-  <section class="tab-panel" id="tab-email">
-    <div class="grid">
-      <div class="card">
-        <h2>📧 邮件要素</h2>
-        <div class="sub">把沟通要点交给 AI，30 秒出稿</div>
-        <div class="field">
-          <label>客户称呼</label>
-          <input type="text" id="e-name" value="王总" maxlength="10">
+  <section class="tab-panel" id="tab-email" data-page-node-id="3SplKkSH46t4ZXts7xyGSo">
+    <div class="grid" data-page-node-id="03Zu999pqFRZxcrn9yxdEB">
+      <div class="card" data-page-node-id="6a4kqHb3AA8gK4CAzohW1x">
+        <h2 data-page-node-id="R5E1QCiy7reYWUMuSUMDap">📧 邮件要素</h2>
+        <div class="sub" data-page-node-id="G1GyuyjA1EYZOhE4g71YEG">把沟通要点交给 AI，30 秒出稿</div>
+        <div class="field" data-page-node-id="Bpl7qxpFrV29r6I2HX6AHN">
+          <label data-page-node-id="CK9zmdetidPhb5uXgPCX18">客户称呼</label>
+          <input type="text" id="e-name" value="王总" maxlength="10" data-page-node-id="jmG55vA33jlDSJ7Cy6Uz3D">
         </div>
-        <div class="field">
-          <label>语气</label>
-          <div class="tone-seg" id="e-tone">
-            <button class="active" data-tone="正式专业">正式专业</button>
-            <button data-tone="亲切自然">亲切自然</button>
-            <button data-tone="简洁干练">简洁干练</button>
+        <div class="field" data-page-node-id="bkBzCOmrHO1O5WzuzDS71p">
+          <label data-page-node-id="opHLCQaxoD2QXfC6IA2DXj">语气</label>
+          <div class="tone-seg" id="e-tone" data-page-node-id="96SD5iBlbGSU9YZ8H3dtAZ">
+            <button class="active" data-tone="正式专业" data-page-node-id="xwKpMOrfFNtBv60dBi0SOa">正式专业</button>
+            <button data-tone="亲切自然" data-page-node-id="GtEMoygBB53IU5BAsjFEqw">亲切自然</button>
+            <button data-tone="简洁干练" data-page-node-id="ezLhh4i85UR1xV8Q5t3ZLW">简洁干练</button>
           </div>
         </div>
-        <div class="field">
-          <label>本次沟通要点（每行一条）</label>
+        <div class="field" data-page-node-id="CMZPBeXl56p8ziGRRSaK0b">
+          <label data-page-node-id="nJjS3tdacAIEAjFo6X5Qsn">本次沟通要点（每行一条）</label>
           <textarea id="e-points" placeholder="例：&#10;演示了排产协同模块，客户认可&#10;担心和老系统对接工作量&#10;下周三前发对接方案"></textarea>
         </div>
-        <button class="btn-primary" id="btn-email">✉️ 生成跟进邮件</button>
+        <button class="btn-primary" id="btn-email" data-page-node-id="UFPLn9h23IeLUV4nT8B1IM">✉️ 生成跟进邮件</button>
       </div>
-      <div id="email-result">
-        <div class="empty"><div class="icon">📨</div><b>邮件草稿将在这里生成</b><p>输出四段式结构：感谢回顾 → 双方共识 → 价值强化 → 明确下一步</p></div>
+      <div id="email-result" data-page-node-id="BioDixNtLuAG38zi0aoWJQ">
+        <div class="empty" data-page-node-id="RVKsRw2vY2NII0CYnVOMyY"><div class="icon" data-page-node-id="rmRjoMyjAjF2kbPTWWPr6E">📨</div><b data-page-node-id="RmVFVJmUtWM1uT4oG8NfK1">邮件草稿将在这里生成</b><p data-page-node-id="STxYLpadhyHPKSB58ePRgr">输出四段式结构：感谢回顾 → 双方共识 → 价值强化 → 明确下一步</p></div>
       </div>
     </div>
   </section>
 </main>
 
-<footer>
-  <b>SalesMate · 销售智囊</b> — 产品原型演示版（V1.0）· 本地规则引擎模拟 AI 生成，无网络请求 ·
-  完整产品方案见 <b>docs/</b> 目录：调研 / 需求 / 路线图 / 流程 / PRD / 技术方案
+<footer data-page-node-id="8g7xKx6GlTLJyZlB4s575U">
+  <b data-page-node-id="cQIEP8BA2RNKiOTAy61GFH">SalesMate · 销售智囊</b> — 产品原型演示版（V1.0）· 默认本地规则引擎，可切换真实 LLM（DeepSeek）·
+  完整产品方案见 <b data-page-node-id="ILFszMFPme0iCbCJBp8Dl5">docs/</b> 目录：调研 / 需求 / 路线图 / 流程 / PRD / 技术方案
 </footer>
 
-<div id="toast">已复制到剪贴板</div>
+<div id="toast" data-page-node-id="zTUVvdWnZPeNHAQafv20rc">已复制到剪贴板</div>
 
 <script>
 /* ==================================================================
@@ -949,19 +957,17 @@ Object.keys(OBJECTIONS).forEach((k, i) => {
   objGrid.appendChild(b);
 });
 
-function renderObjection(key, chip) {
-  document.querySelectorAll(".obj-chip").forEach(c => c.classList.remove("active"));
-  chip.classList.add("active");
-  const o = OBJECTIONS[key];
-  const stepNames = ["认同", "探究", "重构", "证据", "推进"];
+/* 渲染异议应对结果（本地库与真实 LLM 共用） */
+function renderObjectionResult(key, o) {
+  const isLLM = LLM_CONFIG.enabled;
   $("obj-detail").innerHTML = `
     <div class="card">
       <div class="result-head">
-        <div class="result-title">🛡️ 「${escapeHtml(key)}」应对策略</div>
+        <div class="result-title">🛡️ 「${escapeHtml(key)}」应对策略 ${isLLM ? '<span class="tag">真实 LLM</span>' : ''}</div>
         <button class="btn-ghost" onclick="copyText(document.querySelector('#obj-detail .card').innerText)">📋 复制全部</button>
       </div>
       <div class="step-flow">
-        ${stepNames.map((s, i) => `<div class="step-pill">STEP ${i + 1}<small>${s}</small></div>`).join("")}
+        ${o.steps.map(([name], i) => `<div class="step-pill">STEP ${i + 1}<small>${escapeHtml(name)}</small></div>`).join("")}
       </div>
       ${o.steps.map(([name, desc], i) => `
         <div class="step-card">
@@ -974,6 +980,69 @@ function renderObjection(key, chip) {
         <div class="script-sample"><span class="tone">${escapeHtml(tone)}</span><p>${escapeHtml(script)}</p></div>`).join("")}
     </div>`;
 }
+
+async function renderObjection(key, chip) {
+  document.querySelectorAll(".obj-chip").forEach(c => c.classList.remove("active"));
+  if (chip) chip.classList.add("active");
+
+  const detail = $("obj-detail");
+  const preset = OBJECTIONS[key];
+
+  /* 真实 LLM 分支 */
+  if (LLM_CONFIG.enabled) {
+    detail.innerHTML = `<div class="loading-box"><div class="spinner"></div><div class="loading-text">⚡ DeepSeek 正在生成应对策略…</div><div class="loading-sub">五步应对法 · 认同 / 探究 / 重构 / 证据 / 推进</div></div>`;
+    try {
+      const prompt = `请作为资深 B2B 销售教练，为下面这条客户异议生成一套完整可用的应对策略。
+
+【客户异议】${key}
+${preset ? '' : '（这是销售在实际拜访中遇到的真实异议，请针对其具体场景作答，不要套用泛泛的模板）'}
+
+请严格按以下 JSON 格式返回（不要 markdown 代码块、不要任何解释）：
+{
+  "steps": [
+    ["认同", "一句话先接住对方、化解对抗姿态（30-50字）"],
+    ["探究", "一个精准的澄清式提问，拆出异议背后的真实原因（30-50字）"],
+    ["重构", "把异议框架转到对我方有利的角度（40-60字）"],
+    ["证据", "给出可验证的数据、案例或第三方证据（40-60字）"],
+    ["推进", "一个低承诺、可立刻执行的下一步动作（30-50字）"]
+  ],
+  "samples": [
+    ["强势单刀", "一段直接、有压迫感但真诚的应对话术（100-150字）"],
+    ["温和顾问", "一段温和、顾问式、完全站在对方角度的应对话术（100-150字）"]
+  ]
+}`;
+      const text = await callLLM(prompt);
+      const data = extractJSON(text);
+      renderObjectionResult(key, data);
+    } catch (e) {
+      detail.innerHTML = `<div class="empty" style="border-color:#FCA5A5;background:#FEF2F2;color:#991B1B">
+        <div class="icon">⚠️</div>
+        <b>真实 LLM 调用失败</b>
+        <p style="color:#7F1D1D">${escapeHtml(e.message)}</p>
+        <button class="btn-ghost" onclick="toggleEngine()" style="margin-top:8px">切回本地演示模式</button>
+      </div>`;
+    }
+    return;
+  }
+
+  /* 本地分支：仅预设异议可用 */
+  if (!preset) {
+    toast('本地演示模式无法理解自定义异议，请点击顶栏切换真实 LLM');
+    return;
+  }
+  renderObjectionResult(key, preset);
+}
+
+/* 自定义异议 */
+$("btn-objection-custom").onclick = () => {
+  const text = $("obj-custom").value.trim();
+  if (!text) { toast("请先输入你遇到的客户异议"); return; }
+  if (!LLM_CONFIG.enabled) {
+    toast("自定义异议需要真实 LLM 模式，点击顶栏「🔌 本地演示」切换");
+    return;
+  }
+  renderObjection(text, null);
+};
 
 /* ---------- 跟进邮件 ---------- */
 let tone = "正式专业";
